@@ -6,6 +6,29 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, QueryDict
 from json import dumps
 
+class Pagin():
+    def __init__(self, *args, **kwargs):
+        self.result_data = []
+        self.object = kwargs['object']
+        self.page_results = kwargs['page_results']
+        self.page_index = kwargs['page_index']
+        self.pages = len(self.object) / float(self.page_results)
+        if not self.pages.is_integer():
+            self.pages = int(self.pages) + 1
+        index_start = (self.page_index * self.page_results) - (self.page_results)
+        index_end = index_start + (self.page_results)
+        self.result_data = self.object[index_start:index_end]
+
+    def get(self):
+        return {
+            'data': self.result_data,
+            'pages': int(self.pages),
+            'page_index': self.page_index,
+            'page_results': self.page_results,
+            'total': len(self.object)
+        }
+
+
 class User():
     def __init__(self, request, user=None):
         self.request = request
@@ -23,11 +46,23 @@ class User():
         self.out.update({'user': self.serializer(self.user), 'status': 200})
 
     def all(self):
-        __all_user = UserHack.objects.all()
+        self.__validate_search()
+
+        __page_results = self.data['page_results']
+        __page_index = self.data['page_index']
+        del self.data['page_index'], self.data['page_results']
+
+        __all_user = UserHack.objects.filter(**self.data)
+        __p = Pagin(object=__all_user, page_results=__page_results, page_index=__page_index).get()
         __users = []
-        for i in __all_user:
+
+        for i in __p['data']:
             __users.append(self.serializer(i))
-        self.out.update({'users': __users, 'status': 200})
+
+        __p.update({'data': __users})
+
+        self.out.update({'code': 200})
+        self.out.update(__p)
 
     def create(self):
         self.__validate_info()
@@ -72,6 +107,33 @@ class User():
             'company': data.company,
             'email': data.email,
         }
+
+    def __validate_search(self):
+        __name = self.request.GET.get('name', None)
+        if __name:
+            self.data.update({'name__icontains': __name})
+
+        __gender = self.request.GET.get('gender', None)
+        if __gender:
+            self.data.update({'gender': __gender})
+
+        __email = self.request.GET.get('email', None)
+        if __email:
+            self.data.update({'email': __gender})
+
+        __page_results = self.request.GET.get('page_results', 10)
+        if __page_results:
+            try:
+                self.data.update({'page_results': int(__page_results)})
+            except:
+                self.data.update({'page_results': 10})
+
+        __page_results = self.request.GET.get('page_index', 1)
+        if __page_results:
+            try:
+                self.data.update({'page_index': int(__page_results)})
+            except:
+                self.data.update({'page_index': 1})
 
     def __validate_info(self):
         __get_data = ['name', 'gender', 'company', 'email', 'phone', 'address']
