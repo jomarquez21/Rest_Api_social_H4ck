@@ -45,19 +45,19 @@ Simple rest api creada en python con framework django
 
   Debe hacer una peticion put a la siguiente url
   
-  [http://127.0.0.1:8000/user/<id_user>/](http://127.0.0.1:8000/user/<id_user>/)
+  [http://127.0.0.1:8000/user/[id_user]/](http://127.0.0.1:8000/user/<id_user>/)
   
 #### Para lista un usuario
 
   Debe hacer una peticion get a la siguiente url
   
-  [http://127.0.0.1:8000/user/<id_user>/](http://127.0.0.1:8000/user/<id_user>/)
+  [http://127.0.0.1:8000/user/[id_user]/](http://127.0.0.1:8000/user/<id_user>/)
 
 #### Para elimiar un usuario
 
   Debe hacer una peticion delete a la siguiente url
   
-  [http://127.0.0.1:8000/user/<id_user>/](http://127.0.0.1:8000/user/<id_user>/)
+  [http://127.0.0.1:8000/user/[id_user]/](http://127.0.0.1:8000/user/<id_user>/)
 
 #### Para listar todos los usuarios
 
